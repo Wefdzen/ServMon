@@ -1,4 +1,4 @@
-package inituser
+package models
 
 type Server struct {
 	Id       uint8

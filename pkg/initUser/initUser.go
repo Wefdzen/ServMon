@@ -3,12 +3,14 @@ package inituser
 import (
 	"strconv"
 
+	"github.com/Wefdzen/ServMon/pkg/models"
+	"github.com/Wefdzen/ServMon/pkg/service"
 	"github.com/charmbracelet/huh"
 )
 
 // GetServersData launch form for get info about servers.
-func GetServersData() ([]Server, error) {
-	UserServers := make([]Server, 0, 3)
+func GetServersData() ([]models.Server, error) {
+	UserServers := make([]models.Server, 0, 3)
 	tmp := ""
 	//Get count servers
 	huh.NewInput().
@@ -21,10 +23,10 @@ func GetServersData() ([]Server, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	var idCount uint8 = 0
 	//Get data about servers
 	for i := 0; i < countServer; i++ {
-		serverData := Server{}
+		serverData := models.Server{}
 		huh.NewInput().
 			Title("Login(exm: root)").
 			Prompt("?").
@@ -42,9 +44,13 @@ func GetServersData() ([]Server, error) {
 			Run()
 
 		//TODOserverData.Id = config.CountServersOfUser
-		serverData.Id = uint8(i)
+		idCount++
+		serverData.Id = idCount
+		service.SetNewCountServerConfig("./pkg/config/config.json", idCount)
+
 		//add new server
 		UserServers = append(UserServers, serverData)
 	}
+
 	return UserServers, nil
 }
