@@ -1,6 +1,7 @@
 package inituser
 
 import (
+	"errors"
 	"strconv"
 
 	"github.com/Wefdzen/ServMon/pkg/models"
@@ -23,6 +24,11 @@ func GetServersData() ([]models.Server, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Check count of server
+	if countServer <= 0 {
+		return nil, errors.New("count of server <= 0 :(")
+	}
+
 	var idCount uint8 = 0
 	//Get data about servers
 	for i := 0; i < countServer; i++ {
@@ -43,7 +49,6 @@ func GetServersData() ([]models.Server, error) {
 			Value(&serverData.Password).
 			Run()
 
-		//TODOserverData.Id = config.CountServersOfUser
 		idCount++
 		serverData.Id = idCount
 		service.SetNewCountServerConfig("./pkg/config/config.json", idCount)

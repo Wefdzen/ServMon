@@ -33,6 +33,23 @@ func RecordDataServerToFile(servers []models.Server) {
 
 }
 
+// GetCountServer get count of server now
+func GetCountServer(fileName string) (uint8, error) {
+	data, err := os.ReadFile(fileName) // Read file
+	if err != nil {
+		log.Fatalf("Error read from file: %v\n", err)
+		return 0, err
+	}
+	// Get data from file
+	var config config.ConfigUser
+	err = json.Unmarshal(data, &config)
+	if err != nil {
+		log.Fatalf("Error unmarshal file: %v\n", err)
+		return 0, nil
+	}
+	return config.CountServersOfUser, nil
+}
+
 // SetNewCountServerConfig set new count servers in config file.
 func SetNewCountServerConfig(fileName string, newCountServers uint8) {
 	data, err := os.ReadFile(fileName) // Read file
