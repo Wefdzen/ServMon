@@ -1,14 +1,1 @@
-[
-	{
-		"Id": 1,
-		"account": "root",
-		"ipserver": "196.198.1.1",
-		"password": "ohdvcxz"
-	},
-	{
-		"Id": 2,
-		"account": "root",
-		"ipserver": "198.244.11.1",
-		"password": "yyerwqqe"
-	}
-]
+[]

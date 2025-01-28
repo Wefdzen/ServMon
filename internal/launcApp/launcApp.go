@@ -7,6 +7,7 @@ import (
 
 	inituser "github.com/Wefdzen/ServMon/pkg/initUser"
 	"github.com/Wefdzen/ServMon/pkg/service"
+	workwithservers "github.com/Wefdzen/ServMon/pkg/workWithServers"
 )
 
 // LaunchApp responsible for launc main app.
@@ -21,7 +22,7 @@ func LaunchApp() {
 				fmt.Println("Error can't init Servers")
 				return
 			}
-			// Record data about serevers to file
+			// Record data about servers to file
 			service.RecordDataServerToFile(servers)
 		case "2":
 			newServer := inituser.GetDataAboutNewServer()
@@ -29,8 +30,22 @@ func LaunchApp() {
 		case "3":
 			inituser.DeleteNewServer(inituser.GetIpOfServer(), "./servers.json")
 		case "4":
-			fmt.Println("end of programm")
+			fmt.Println("end settings")
 			return
+		case "5":
+			data, err := service.GetInfoServers("./servers.json")
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			for i := 0; i < len(data); i++ {
+				output, err := workwithservers.SendCommandToServer(data[i].IpServer, data[i].Account, data[i].Password, "free", "")
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				fmt.Println(output)
+			}
 		}
 
 	}
@@ -45,6 +60,7 @@ func menu() string {
 			huh.NewOption("2. Add new server", "2"),
 			huh.NewOption("3. Delete server", "3"),
 			huh.NewOption("4. Exit", "4"),
+			huh.NewOption("5. Send command free", "5"),
 		).
 		Value(&mode). //
 		Run()

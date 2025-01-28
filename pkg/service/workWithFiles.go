@@ -45,9 +45,25 @@ func GetCountServer(fileName string) (uint8, error) {
 	err = json.Unmarshal(data, &config)
 	if err != nil {
 		log.Fatalf("Error unmarshal file: %v\n", err)
-		return 0, nil
+		return 0, err
 	}
 	return config.CountServersOfUser, nil
+}
+
+func GetInfoServers(fileName string) ([]models.Server, error) {
+	data, err := os.ReadFile(fileName) // Read file
+	if err != nil {
+		log.Fatalf("Error read from file: %v\n", err)
+		return nil, err
+	}
+	// Get data from file
+	var dataAboutServers []models.Server
+	err = json.Unmarshal(data, &dataAboutServers)
+	if err != nil {
+		log.Fatalf("Error unmarshal file: %v\n", err)
+		return nil, err
+	}
+	return dataAboutServers, nil
 }
 
 // SetNewCountServerConfig set new count servers in config file.

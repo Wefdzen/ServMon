@@ -45,6 +45,11 @@ func AddNewServer(newServ models.Server, fileName string) error {
 		log.Fatalf("write file error %v\n", err)
 		return err
 	}
+	//Get counter
+	tmp, _ := service.GetCountServer("./pkg/config/config.json")
+	tmp++
+	//Set new counter
+	service.SetNewCountServerConfig("./pkg/config/config.json", tmp)
 	return nil
 }
 
@@ -87,6 +92,11 @@ func DeleteNewServer(ip, fileName string) error {
 		log.Fatalf("write file error %v\n", err)
 		return err
 	}
+	//Get counter
+	tmp, _ := service.GetCountServer("./pkg/config/config.json")
+	tmp--
+	//Set new counter
+	service.SetNewCountServerConfig("./pkg/config/config.json", tmp)
 	return nil
 }
 
@@ -108,11 +118,6 @@ func GetDataAboutNewServer() models.Server {
 		Prompt("?").
 		Value(&serverData.Password).
 		Run()
-	//Get new counter
-	serverData.Id, _ = service.GetCountServer("./pkg/config/config.json")
-	serverData.Id++
-	//Set new counter
-	service.SetNewCountServerConfig("./pkg/config/config.json", serverData.Id)
 	//Success
 	return serverData
 }
