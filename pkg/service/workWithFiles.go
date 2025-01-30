@@ -11,26 +11,28 @@ import (
 )
 
 // RecordDataServerToFile record data about servers to file only for init user add here don't work.
-func RecordDataServerToFile(servers []models.Server) {
+func RecordDataServerToFile(servers []models.Server) error {
 	data, err := json.MarshalIndent(servers, "", "	")
 	if err != nil {
 		fmt.Println("marshal error")
-		return
+		return err
 	}
-	file, err := os.OpenFile("servers.json", os.O_WRONLY, 0666)
+
+	file, err := os.Create("./servers.json")
 	if err != nil {
-		fmt.Println("open file error")
-		return
+		log.Fatalf("open file error %v\n", err)
+		return err
 	}
 	defer file.Close()
+
 	_, err = file.Write(data)
 	if err != nil {
-		fmt.Println("write file error")
-		return
+		log.Fatalf("write file error %v\n", err)
+		return err
 	}
 
 	fmt.Println("Data successfully written to servers.json")
-
+	return nil
 }
 
 // GetCountServer get count of server now

@@ -34,7 +34,12 @@ func GetServersData() ([]models.Server, error) {
 	for i := 0; i < countServer; i++ {
 		serverData := models.Server{}
 		huh.NewInput().
-			Title("Login(exm: root)").
+			Title("Name of service (e.g.: DigitalOcean)").
+			Prompt("?").
+			Value(&serverData.NameOfService).
+			Run()
+		huh.NewInput().
+			Title("Login (e.g.: root)").
 			Prompt("?").
 			Value(&serverData.Account).
 			Run()

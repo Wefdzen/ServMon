@@ -53,7 +53,7 @@ func AddNewServer(newServ models.Server, fileName string) error {
 	return nil
 }
 
-// DeleteNewServer delete info about server from file TODO(loss id)
+// DeleteNewServer delete info about server from file.
 func DeleteNewServer(ip, fileName string) error {
 	data, err := os.ReadFile(fileName) // Read file
 	if err != nil {
@@ -103,6 +103,11 @@ func DeleteNewServer(ip, fileName string) error {
 // GetDataAboutNewServer form huh for 1 server
 func GetDataAboutNewServer() models.Server {
 	serverData := models.Server{}
+	huh.NewInput().
+		Title("Name of service (e.g.: DigitalOcean)").
+		Prompt("?").
+		Value(&serverData.NameOfService).
+		Run()
 	huh.NewInput().
 		Title("Login(exm: root)").
 		Prompt("?").

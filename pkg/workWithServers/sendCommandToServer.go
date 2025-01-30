@@ -2,13 +2,14 @@ package workwithservers
 
 import (
 	"fmt"
+	"time"
 
 	"golang.org/x/crypto/ssh"
 )
 
 // SendCommandToServer ip-ip of server, pasw - pasw of server, command - command to request
 // portSSH - if empty like("") will be by default 22 if not empty will be custom port
-// return a output of your command.
+// return a output of your command, time to establish 3 sec can custom.
 func SendCommandToServer(ip, userRole, password, command, portSSH string) (string, error) {
 	// data for connect to server
 	server := ip     // ip of server
@@ -24,6 +25,7 @@ func SendCommandToServer(ip, userRole, password, command, portSSH string) (strin
 		Auth: []ssh.AuthMethod{
 			ssh.Password(password),
 		},
+		Timeout:         3 * time.Second,             // time to establish
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(), // Важно: для простоты, но не рекомендуется в продакшн
 	}
 

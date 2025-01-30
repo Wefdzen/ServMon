@@ -23,7 +23,10 @@ func LaunchApp() {
 				return
 			}
 			// Record data about servers to file
-			service.RecordDataServerToFile(servers)
+			err = service.RecordDataServerToFile(servers)
+			if err != nil {
+				fmt.Println(err)
+			}
 		case "2":
 			newServer := inituser.GetDataAboutNewServer()
 			inituser.AddNewServer(newServer, "./servers.json")
@@ -44,6 +47,7 @@ func LaunchApp() {
 					fmt.Println(err)
 					return
 				}
+				fmt.Println(data[i].NameOfService)
 				fmt.Println(output)
 			}
 		}
