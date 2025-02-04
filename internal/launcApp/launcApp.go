@@ -2,6 +2,7 @@ package launcapp
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/charmbracelet/huh"
 
@@ -12,7 +13,6 @@ import (
 
 // LaunchApp responsible for launc main app.
 func LaunchApp() {
-
 	for {
 		switch menu() {
 		case "1":
@@ -41,14 +41,25 @@ func LaunchApp() {
 				fmt.Println(err)
 				return
 			}
+			//get command from bash file
+			myCmd, err := os.ReadFile("./pkg/workWithServers/commandToServer.bash") // just pass the file name
+			if err != nil {
+				fmt.Print(err)
+			}
+			//launch command in servers
 			for i := 0; i < len(data); i++ {
-				output, err := workwithservers.SendCommandToServer(data[i].IpServer, data[i].Account, data[i].Password, "free", "")
+				output, err := workwithservers.SendCommandToServer(data[i].IpServer, data[i].Account, data[i].Password, string(myCmd), "")
 				if err != nil {
 					fmt.Println(err)
 					return
 				}
 				fmt.Println(data[i].NameOfService)
-				fmt.Println(output)
+				mdl := service.ParseSystemStats(output)
+				//TODO сделать выборку статусов
+				statusCode := []string{"Ok", "Can be better", "Bad", "VERY BAD"}
+				fmt.Println("Load Avg (5 min):", mdl.LoadAvg5Min, "Status:", statusCode)
+				fmt.Println("RAM:", mdl.Ram)
+				fmt.Println("Disk Usage:", mdl.Memory)
 			}
 		}
 
@@ -64,9 +75,9 @@ func menu() string {
 			huh.NewOption("2. Add new server", "2"),
 			huh.NewOption("3. Delete server", "3"),
 			huh.NewOption("4. Exit", "4"),
-			huh.NewOption("5. Send command free", "5"),
+			huh.NewOption("5. Send command", "5"),
 		).
-		Value(&mode). //
+		Value(&mode).
 		Run()
 	return mode
 }
