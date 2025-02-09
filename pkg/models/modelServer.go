@@ -9,9 +9,10 @@ type Server struct {
 }
 
 type ServerInfo struct {
-	IpServer    string
-	CoreCount   uint8
-	LoadAvg5Min string
-	Ram         string
-	Memory      string
+	NameOfService string
+	IpServer      string
+	CoreCount     uint8
+	LoadAvg5Min   string
+	Ram           string
+	Memory        string
 }

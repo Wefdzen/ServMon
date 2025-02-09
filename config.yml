@@ -1,0 +1,5 @@
+PG_host: "localhost" # if it will be from other container => PG_host="nameContainer" => PG_host="postgres"
+PG_port: "5432"
+PG_user: "postgres"
+PG_db_name: "ServMon"
+PG_password: "12345"

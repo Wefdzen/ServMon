@@ -1,9 +1,9 @@
 [
-	{
-		"Id": 0,
-		"nameofservice": "ru",
-		"account": "root",
-		"ipserver": "195.133.1.46",
-		"password": "yfgRvVQPQ3"
-	}
+    {
+        "Id": 1,
+        "nameofservice": "AEZA",
+        "account": "root",
+        "ipserver": "",
+        "password": ""
+    }
 ]

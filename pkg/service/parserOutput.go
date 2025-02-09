@@ -9,8 +9,10 @@ import (
 	"github.com/Wefdzen/ServMon/pkg/models"
 )
 
-func ParseSystemStats(output string) models.ServerInfo {
+func ParseSystemStats(output string, res models.Server) models.ServerInfo {
 	var info models.ServerInfo
+	info.NameOfService = res.NameOfService
+	info.IpServer = res.IpServer
 
 	info.CoreCount = uint8(runtime.NumCPU())
 	//get for 5min (load average: X.X)
@@ -28,14 +30,15 @@ func ParseSystemStats(output string) models.ServerInfo {
 		usedMem, _ := strconv.Atoi(memMatches[2])
 		info.Ram = fmt.Sprintf("%d/%d MB", usedMem, totalMem)
 	}
-	// get memory (например, /dev/sda1)
-	diskRegex := regexp.MustCompile(`/dev/sda1\s+([\d\.]+)[GM]+\s+([\d\.]+)[GM]+\s+([\d\.]+)[GM]+`)
+	// get memory
+	diskRegex := regexp.MustCompile(`/dev/\S+\s+([\d\.]+)[GM]+\s+([\d\.]+)[GM]+\s+([\d\.]+)[GM]+`)
 	diskMatches := diskRegex.FindStringSubmatch(output)
 	if len(diskMatches) > 3 {
 		usedSize, _ := strconv.ParseFloat(diskMatches[2], 64)
 		totalSize, _ := strconv.ParseFloat(diskMatches[1], 64)
-		info.Memory = fmt.Sprintf("Used %.2f GB of %.2f GB", usedSize, totalSize)
+		info.Memory = fmt.Sprintf("Used %.1f GB of %.1f GB", usedSize, totalSize)
 	}
 
+	fmt.Println("OUTPUT:", output)
 	return info
 }
