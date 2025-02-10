@@ -1,7 +1,14 @@
 package main
 
-import launcapp "github.com/Wefdzen/ServMon/internal/launcApp"
+import (
+	"log"
+
+	launcapp "github.com/Wefdzen/ServMon/internal/launcApp"
+	"github.com/Wefdzen/ServMon/internal/website/router"
+)
 
 func main() {
-	launcapp.LaunchApp()
+	go launcapp.LaunchApp()
+	r := router.SetupRouter()
+	log.Fatal(r.Run(":8080"))
 }
