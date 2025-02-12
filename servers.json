@@ -5,5 +5,12 @@
         "account": "root",
         "ipserver": "",
         "password": ""
+    },
+    {
+        "Id": 0,
+        "nameofservice": "Dany",
+        "account": "root",
+        "ipserver": "",
+        "password": ""
     }
 ]
