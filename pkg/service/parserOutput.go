@@ -39,6 +39,5 @@ func ParseSystemStats(output string, res models.Server) models.ServerInfo {
 		info.Memory = fmt.Sprintf("Used %.1f GB of %.1f GB", usedSize, totalSize)
 	}
 
-	fmt.Println("OUTPUT:", output)
 	return info
 }

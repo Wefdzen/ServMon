@@ -15,8 +15,8 @@ func MainPage() gin.HandlerFunc {
 	}
 }
 
-func Graphs() gin.HandlerFunc {
+func GraphsWithMode() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		services.DrawAllParam(c)
+		services.DrawAllParamWithMode(c)
 	}
 }

@@ -1,8 +1,10 @@
 package launcapp
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/charmbracelet/huh"
@@ -39,25 +41,47 @@ func LaunchApp() {
 			fmt.Println("end settings")
 			return
 		case "5":
-			go case5()
-		}
+			// sigChan := make(chan os.Signal, 1)
+			// signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
+			// done := make(chan bool, 1)
+
+			// go func() {
+			// 	sig := <-sigChan // wait a signal
+			// 	fmt.Printf("\nSignal received: %v\n", sig)
+			// 	// Clear file for future use those data will be not relevant
+			// 	file, err := os.Create("./internal/launchApp/lastRecord.json")
+			// 	if err != nil {
+			// 		fmt.Println(err)
+			// 	}
+			// 	defer file.Close()
+
+			// 	done <- true // Send signal end
+			// }()
+			go case5()
+		case "6":
+			fmt.Println("here will be on/off of smtp")
+			case6()
+		}
 	}
 }
 
 func case5() {
-	for { // inf
+	var records []model.RecordAboutServerInfo
+	for {
 		data, err := service.GetInfoServers("./servers.json")
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
-		//get command from bash file
-		myCmd, err := os.ReadFile("./pkg/workWithServers/commandToServer.bash") // just pass the file name
+
+		// get command from bash file
+		myCmd, err := os.ReadFile("./pkg/workWithServers/commandToServer.bash")
 		if err != nil {
 			fmt.Print(err)
 		}
-		//launch command in servers
+
+		// launch command in servers, len(data) is count of servers
 		for i := 0; i < len(data); i++ {
 			output, err := workwithservers.SendCommandToServer(data[i].IpServer, data[i].Account, data[i].Password, string(myCmd), "")
 			if err != nil {
@@ -65,25 +89,8 @@ func case5() {
 				return
 			}
 			mdl := service.ParseSystemStats(output, data[i])
-			//TODO mb add smtp if bad
-			// statusCode := []string{"Ok", "Can be better", "Bad", "VERY BAD"}
-			// tmp, _ := strconv.ParseFloat(mdl.LoadAvg5Min, 64)
-			// switch val := tmp / float64(mdl.CoreCount); {
-			// case val <= 0.7:
-			// 	fmt.Println("Load Avg (5 min):", mdl.LoadAvg5Min, "Status:", statusCode[0])
-			// case val <= 2.0:
-			// 	fmt.Println("Load Avg (5 min):", mdl.LoadAvg5Min, "Status:", statusCode[1])
-			// case val < 5.0:
-			// 	fmt.Println("Load Avg (5 min):", mdl.LoadAvg5Min, "Status:", statusCode[2])
-			// case val >= 5.0:
-			// 	fmt.Println("Load Avg (5 min):", mdl.LoadAvg5Min, "Status:", statusCode[3])
-			// default:
-			// 	fmt.Println("something wrong :(")
-			// }
-			// fmt.Println("RAM:", mdl.Ram)
-			// fmt.Println("Disk Usage:", mdl.Memory)
 
-			//work with db test
+			// create record
 			rec := model.RecordAboutServerInfo{
 				Time:        time.Now().Unix(),
 				NameService: mdl.NameOfService,
@@ -92,30 +99,74 @@ func case5() {
 				Ram:         mdl.Ram,
 				Memory:      mdl.Memory,
 			}
-			userRepo := database.NewGormUserRepository()
-			database.AddNewRecord(userRepo, &rec)
+
+			// add record to slice
+			records = append(records, rec)
+
+			//work with file
+			file, err := os.Create("./internal/launcApp/lastRecord.json")
+			if err != nil {
+				fmt.Println(err)
+			}
+			defer file.Close()
+			dataJson, err := json.MarshalIndent(records, "", "	")
+			if err != nil {
+				fmt.Println(err)
+			}
+			_, err = file.Write(dataJson)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			// if we have 12 records, calculate average and save to db
+			if len(records) == 12 {
+				avgRecord := calculateAverage(records)
+				userRepo := database.NewGormUserRepository()
+				database.AddNewRecord(userRepo, avgRecord)
+				records = records[:0] // reset records slice
+			}
 		}
-		time.Sleep(5 * time.Minute) // every 5 min will be
+		time.Sleep(1 * time.Minute) // every 5 min will be
 	}
 }
 
-// func getAvg(resultOf []model.RecordAboutServerInfo) *model.RecordAboutServerInfo {
-// 	res := resultOf[0]
-// 	var sum float64
-// 	for i := 0; i < len(resultOf); i++ {
-// 		tmp, _ := strconv.ParseFloat(resultOf[i].LoadAvg5Min, 64)
-// 		sum += tmp
-// 	}
-// 	res.LoadAvg5Min = fmt.Sprintf("%v", sum/float64(len(resultOf)))
-// 	sum = 0.0
-// 	for i := 0; i < len(resultOf); i++ {
-// 		tmp, _ := strconv.ParseFloat(resultOf[i].Ram, 64)
-// 		sum += tmp
-// 	}
-// 	res.Ram = fmt.Sprintf("%v", )
-// 	res.Memory = resultOf[len(resultOf)-1].Memory //use last 'cause last record is True
-// 	return &res
-// }
+func calculateAverage(records []model.RecordAboutServerInfo) *model.RecordAboutServerInfo {
+	var sumLoadAvg, sumRam float64
+	for _, rec := range records {
+		loadAvg, _ := strconv.ParseFloat(rec.LoadAvg5Min, 64)
+		ram, _ := strconv.ParseFloat(rec.Ram, 64)
+		sumLoadAvg += loadAvg
+		sumRam += ram
+	}
+
+	avgRecord := records[0]
+	avgRecord.LoadAvg5Min = fmt.Sprintf("%v", sumLoadAvg/float64(len(records)))
+	avgRecord.Ram = fmt.Sprintf("%v", sumRam/float64(len(records)))
+	avgRecord.Memory = records[len(records)-1].Memory // use last 'cause last record is True
+
+	return &avgRecord
+}
+
+func case6() {
+	//TODO mb add smtp if bad
+	// statusCode := []string{"Ok", "Can be better", "Bad", "VERY BAD"}
+	// tmp, _ := strconv.ParseFloat(mdl.LoadAvg5Min, 64)
+	// switch val := tmp / float64(mdl.CoreCount); {
+	// case val <= 0.7:
+	// 	fmt.Println("Load Avg (5 min):", mdl.LoadAvg5Min, "Status:", statusCode[0])
+	// case val <= 2.0:
+	// 	fmt.Println("Load Avg (5 min):", mdl.LoadAvg5Min, "Status:", statusCode[1])
+	// case val < 5.0:
+	// 	fmt.Println("Load Avg (5 min):", mdl.LoadAvg5Min, "Status:", statusCode[2])
+	// case val >= 5.0:
+	// 	fmt.Println("Load Avg (5 min):", mdl.LoadAvg5Min, "Status:", statusCode[3])
+	// default:
+	// 	fmt.Println("something wrong :(")
+	// }
+	// fmt.Println("RAM:", mdl.Ram)
+	// fmt.Println("Disk Usage:", mdl.Memory)
+
+}
 
 func menu() string {
 	var mode string
@@ -127,6 +178,7 @@ func menu() string {
 			huh.NewOption("3. Delete server", "3"),
 			huh.NewOption("4. Exit", "4"),
 			huh.NewOption("5. Send command(daemon)", "5"),
+			huh.NewOption("6. On/Off smtp mailout about crit loadAvg", "6"),
 		).
 		Value(&mode).
 		Run()
