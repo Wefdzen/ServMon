@@ -32,11 +32,17 @@ func GenerateLineMemory(res []model.RecordAboutServerInfo) []opts.LineData {
 }
 
 func GetMaxMemory(res []model.RecordAboutServerInfo) string {
+	if len(res) <= 0 {
+		return "haven't"
+	}
 	_, maxMemory, _ := parseMemory(res[0].Memory)
 	return maxMemory
 }
 
 func GetMaxRam(res []model.RecordAboutServerInfo) string {
+	if len(res) <= 0 {
+		return "haven't"
+	}
 	_, maxRam, _ := parseRam(res[0].Ram)
 	return maxRam
 }

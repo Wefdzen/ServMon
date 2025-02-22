@@ -26,11 +26,17 @@ func (r *GormUserRepository) AddNewRec(newRecord *model.RecordAboutServerInfo) {
 
 func (r *GormUserRepository) GetRec(ipServer string) []model.RecordAboutServerInfo {
 	var tmp []model.RecordAboutServerInfo
-	oneMonthAgo := time.Now().AddDate(0, -1, 0).Unix()
-	r.db.Where("time BETWEEN ? AND ?", oneMonthAgo, time.Now().Unix()).
+	//oneMonthAgo := time.Now().AddDate(0, -1, 0).Unix()
+	twelveHoursAgo := time.Now().Add(-12*time.Hour - 4*time.Minute).Unix()
+
+	//	r.db.Where("time BETWEEN ? AND ?", oneMonthAgo, time.Now().Unix()).
+
+	r.db.Where("time > ?", twelveHoursAgo).
 		Where("ip_server = ?", ipServer).
-		Order("time DESC"). // с конца
+		//Where("time > ?", twelveHoursAgo). // Только записи новее 12 часов 4 минут
+		Order("time DESC").
 		Limit(12).
 		Find(&tmp)
+
 	return tmp
 }

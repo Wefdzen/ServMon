@@ -21,7 +21,6 @@ func SendMail(nameOfServer, status, loadAvg string) error {
 	// and send the email all in one step.
 	to := []string{yourMail}
 
-	//TODO add name of server where will be error
 	msg := []byte(fmt.Sprintf("To: %v\r\n"+
 		"Subject: ServMon %v %v!\r\n"+
 		"\r\n"+

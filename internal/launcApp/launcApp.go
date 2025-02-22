@@ -60,14 +60,15 @@ func LaunchApp() {
 			// }()
 			go case5()
 		case "6":
-			fmt.Println("here will be on/off of smtp")
+			fmt.Println("here will be on/off of smtp NOW NOT WORK")
 			case6()
 		}
 	}
 }
 
 func case5() {
-	var records []model.RecordAboutServerInfo
+	var recordsByServer = make(map[string][]model.RecordAboutServerInfo) // Ключ — IP сервера
+
 	for {
 		data, err := service.GetInfoServers("./servers.json")
 		if err != nil {
@@ -75,13 +76,11 @@ func case5() {
 			return
 		}
 
-		// get command from bash file
 		myCmd, err := os.ReadFile("./pkg/workWithServers/commandToServer.bash")
 		if err != nil {
 			fmt.Print(err)
 		}
 
-		// launch command in servers, len(data) is count of servers
 		for i := 0; i < len(data); i++ {
 			output, err := workwithservers.SendCommandToServer(data[i].IpServer, data[i].Account, data[i].Password, string(myCmd), "")
 			if err != nil {
@@ -100,16 +99,40 @@ func case5() {
 				Memory:      mdl.Memory,
 			}
 
-			// add record to slice
-			records = append(records, rec)
+			// Добавляем в мапу записей для конкретного сервера
+			recordsByServer[rec.IpServer] = append(recordsByServer[rec.IpServer], rec)
 
-			//work with file
-			file, err := os.Create("./internal/launcApp/lastRecord.json")
-			if err != nil {
-				fmt.Println(err)
+			if len(recordsByServer[rec.IpServer]) >= 24 {
+				recordsByServer[rec.IpServer] = recordsByServer[rec.IpServer][12:]
 			}
+			// Проверяем, есть ли 12 записей для текущего сервера
+			if len(recordsByServer[rec.IpServer]) == 12 { //13 уже не надо ждем 24 он очищает => снова получается 12 и оно тут проходит
+				// if we get 12 rec => if first of 12 rec is old by 1 hour 4 min(just in case) this data is old and we need delete this
+				lastRecord := recordsByServer[rec.IpServer]
+				if lastRecord[0].Time > int64(time.Now().Add(-(time.Hour + (time.Minute * 4))).Unix()) {
+					avgRecord := calculateAverage(recordsByServer[rec.IpServer]) // Считаем среднее
+					userRepo := database.NewGormUserRepository()
+					database.AddNewRecord(userRepo, avgRecord)
+				} else { // clear file 'cause we need new data
+					recordsByServer[rec.IpServer] = recordsByServer[rec.IpServer][0:0]
+				}
+
+			}
+		}
+
+		// Подготовка массива всех записей перед записью в файл
+		var allRecords []model.RecordAboutServerInfo
+		for _, records := range recordsByServer {
+			allRecords = append(allRecords, records...) // Добавляем все записи из каждого сервера
+		}
+
+		// Записываем в JSON только массив
+		file, err := os.Create("./internal/launcApp/lastRecord.json")
+		if err != nil {
+			fmt.Println(err)
+		} else {
 			defer file.Close()
-			dataJson, err := json.MarshalIndent(records, "", "	")
+			dataJson, err := json.MarshalIndent(allRecords, "", "  ") // Записываем массив, а не map
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -117,16 +140,9 @@ func case5() {
 			if err != nil {
 				fmt.Println(err)
 			}
-
-			// if we have 12 records, calculate average and save to db
-			if len(records) == 12 {
-				avgRecord := calculateAverage(records)
-				userRepo := database.NewGormUserRepository()
-				database.AddNewRecord(userRepo, avgRecord)
-				records = records[:0] // reset records slice
-			}
 		}
-		time.Sleep(1 * time.Minute) // every 5 min will be
+
+		time.Sleep(5 * time.Minute)
 	}
 }
 

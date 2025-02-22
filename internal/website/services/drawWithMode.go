@@ -48,22 +48,31 @@ func DrawAllParamWithMode(c *gin.Context) {
 
 	// Get the data for the specific server
 	var tmp []model.RecordAboutServerInfo
+	//TODO implement mods 3, 4
 	if mode != 1 {
 		tmp = database.GetRecordByIp(userRepo, data[serverIndex].IpServer)
-	} else { // if man choose 1 hour mode => need use not db -> tmp file with 12 record every 5min but he update every 1hour
-		dataOfLastRecord, err := os.ReadFile("./internal/launcApp/lastRecord.json") // Read file
+	} else { // если пользователь выбрал режим 1 час, нужно использовать файл с 12 записями каждые 5 минут
+		dataOfLastRecord, err := os.ReadFile("./internal/launcApp/lastRecord.json") // Чтение файла
 		if err != nil {
 			fmt.Println(err)
 		}
+
 		var SortServ []model.RecordAboutServerInfo
 		err = json.Unmarshal(dataOfLastRecord, &SortServ)
 		if err != nil {
 			fmt.Println(err)
 		}
-		for i := 0; i < len(SortServ); i++ {
-			if SortServ[i].IpServer == data[serverIndex].IpServer {
-				tmp = append(tmp, SortServ[i])
+
+		// Фильтруем записи по IP сервера
+		for _, record := range SortServ {
+			if record.IpServer == data[serverIndex].IpServer {
+				tmp = append(tmp, record)
 			}
+		}
+
+		// Если записей больше 12, берем только последние 12
+		if len(tmp) > 12 {
+			tmp = tmp[len(tmp)-12:] // Берем последние 12 записей
 		}
 	}
 
