@@ -68,7 +68,7 @@ func LaunchApp() {
 }
 func init() {
 	//clear lastRecord.json file
-	file, err := os.Create("./internal/launcApp/lastRecord.json")
+	file, err := os.Create("./internal/launchApp/lastRecord.json")
 	var clear []int
 	if err != nil {
 		fmt.Println(err)
@@ -146,7 +146,7 @@ func case5() {
 		}
 
 		// Записываем в JSON только массив
-		file, err := os.Create("./internal/launcApp/lastRecord.json")
+		file, err := os.Create("./internal/launchApp/lastRecord.json")
 		if err != nil {
 			fmt.Println(err)
 		} else {
@@ -212,12 +212,12 @@ func menu() string {
 	huh.NewSelect[string]().
 		Title("Select an action").
 		Options(
-			huh.NewOption("1. If first open this app", "1"),
-			huh.NewOption("2. Add new server", "2"),
-			huh.NewOption("3. Delete server", "3"),
+			huh.NewOption("1. Launch the app for the first time", "1"),
+			huh.NewOption("2. Add a new server", "2"),
+			huh.NewOption("3. Delete a server", "3"),
 			huh.NewOption("4. Exit", "4"),
-			huh.NewOption("5. Send command(daemon)", "5"),
-			huh.NewOption("6. On/Off smtp mailout about crit loadAvg", "6"),
+			huh.NewOption("5. Send command (start record data)", "5"),
+			huh.NewOption("6. Toggle SMTP notifications for critical load average", "6"),
 		).
 		Value(&mode).
 		Run()

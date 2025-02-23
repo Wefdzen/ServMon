@@ -56,7 +56,7 @@ func DrawAllParamWithMode(c *gin.Context) {
 	var tmp []model.RecordAboutServerInfo
 	switch mode {
 	case 1: // если пользователь выбрал режим 1 час, нужно использовать файл с 12 записями каждые 5 минут
-		dataOfLastRecord, err := os.ReadFile("./internal/launcApp/lastRecord.json") // Чтение файла
+		dataOfLastRecord, err := os.ReadFile("./internal/launchApp/lastRecord.json") // Чтение файла
 		if err != nil {
 			fmt.Println(err)
 		}
