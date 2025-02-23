@@ -17,5 +17,6 @@ func SetupRouter() *gin.Engine {
 
 	r.GET("/", handlers.MainPage())
 	r.GET("/test/:numServ/:mode", handlers.GraphsWithMode())
+	r.GET("/api/servers", handlers.GetServersNames())
 	return r
 }

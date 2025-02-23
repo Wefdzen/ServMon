@@ -28,7 +28,7 @@
             }
 
             .button-container {
-                margin-bottom: 30px;
+                margin-bottom: 20px;
             }
 
             button {
@@ -48,22 +48,12 @@
                 transform: scale(1.05);
             }
 
-            .theme-toggle {
-                position: absolute;
-                top: 20px;
-                right: 20px;
-                background: #34495e;
-                color: white;
-                border: none;
-                padding: 12px 20px;
-                border-radius: 5px;
+            select {
+                padding: 10px;
                 font-size: 16px;
-                cursor: pointer;
-                transition: background 0.3s ease;
-            }
-
-            .theme-toggle:hover {
-                background: #2c3e50;
+                border-radius: 5px;
+                border: 1px solid #ccc;
+                margin-bottom: 20px;
             }
 
             iframe {
@@ -79,59 +69,80 @@
             iframe:hover {
                 box-shadow: 0px 12px 20px rgba(0, 0, 0, 0.3);
             }
-
-            .dark-mode {
-                background-color: #2c3e50;
-                color: #ecf0f1;
-            }
-
-            .dark-mode button {
-                background: #1abc9c;
-                color: #fff;
-            }
-
-            .dark-mode button:hover {
-                background: #16a085;
-            }
-
-            .dark-mode h1 {
-                color: #ecf0f1;
-            }
         </style>
     </head>
     <body>
-        <button class="theme-toggle" onclick="toggleTheme()">
-            Toggle Theme
-        </button>
         <h1>Server Monitoring</h1>
+
+        <label for="serverSelect">Choose server:</label>
+        <select id="serverSelect" onchange="updateLinks()"></select>
+
         <div class="button-container">
-            <button onclick="loadChart(1)">1 Hour</button>
-            <a href="http://localhost:8080/test/2"
-                ><button>TEST BUttom</button></a
-            >
-            <button onclick="loadChart(1)">2 Hour</button>
+            <a id="btn1" href="#"><button>1 Hour</button></a>
+            <a id="btn2" href="#"><button>12 Hours</button></a>
+            <a id="btn3" href="#"><button>24 Hours</button></a>
         </div>
+
         <iframe id="chart-frame" src="/static/line.html"></iframe>
 
         <script>
-            function toggleTheme() {
-                document.body.classList.toggle("dark-mode");
-                document
-                    .getElementById("chart-frame")
-                    .contentWindow.postMessage(
-                        {
-                            theme: document.body.classList.contains("dark-mode")
-                                ? "dark"
-                                : "light",
-                        },
-                        "*"
-                    );
+            async function fetchServers() {
+                try {
+                    let response = await fetch("/api/servers");
+                    let servers = await response.json();
+                    let select = document.getElementById("serverSelect");
+                    select.innerHTML = "";
+
+                    // Загружаем сохраненный сервер из localStorage
+                    let savedServer = localStorage.getItem("selectedServer");
+
+                    servers.forEach((server) => {
+                        let option = document.createElement("option");
+                        option.value = server.id;
+                        option.textContent = server.name;
+                        select.appendChild(option);
+                    });
+
+                    // Устанавливаем сохраненный сервер, если он есть
+                    if (savedServer) {
+                        select.value = savedServer;
+                    }
+
+                    updateLinks();
+                } catch (error) {
+                    console.error("Ошибка загрузки серверов:", error);
+                }
             }
 
-            function loadChart(hours) {
-                console.log("Loading data for", hours, "hours");
-                // You can implement chart loading logic based on selected hours here
+            function updateLinks() {
+                let server = document.getElementById("serverSelect").value;
+
+                // Сохраняем выбранный сервер в localStorage
+                localStorage.setItem("selectedServer", server);
+
+                document.getElementById(
+                    "btn1"
+                ).href = `http://localhost:8080/test/${server}/1`;
+                document.getElementById(
+                    "btn2"
+                ).href = `http://localhost:8080/test/${server}/2`;
+                document.getElementById(
+                    "btn3"
+                ).href = `http://localhost:8080/test/${server}/3`;
             }
+
+            // Загружаем список серверов при загрузке страницы
+            fetchServers();
         </script>
+        <br /><br /><br />
+        <br /><br /><br />
+        <div class="app">
+            Source code:
+            <a href="https://github.com/Wefdzen/ServMon" target="_blank"
+                >GitHub</a
+            >
+        </div>
+
+        <div class="footer">Powered by <b>Wefdzen</b></div>
     </body>
 </html>
