@@ -7,7 +7,7 @@ import (
 )
 
 // currrentRam, maxRam, error
-func parseRam(ramStr string) (string, string, error) {
+func ParseRam(ramStr string) (string, string, error) {
 	// Регулярное выражение для поиска двух чисел, разделенных слэшем
 	re := regexp.MustCompile(`(\d+)/(\d+) MB`)
 

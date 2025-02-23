@@ -16,7 +16,7 @@ func GenerateLineItems(res []model.RecordAboutServerInfo) []opts.LineData {
 func GenerateLineRam(res []model.RecordAboutServerInfo) []opts.LineData {
 	items := make([]opts.LineData, 0)
 	for i := 0; i < len(res); i++ {
-		curRam, _, _ := parseRam(res[i].Ram)
+		curRam, _, _ := ParseRam(res[i].Ram)
 		items = append(items, opts.LineData{Value: curRam})
 	}
 	return items
@@ -43,6 +43,6 @@ func GetMaxRam(res []model.RecordAboutServerInfo) string {
 	if len(res) <= 0 {
 		return "haven't"
 	}
-	_, maxRam, _ := parseRam(res[0].Ram)
+	_, maxRam, _ := ParseRam(res[0].Ram)
 	return maxRam
 }

@@ -9,7 +9,7 @@ import (
 )
 
 // loadAvgCore return line for echarts. Create averages of Core, mode=> 1 is 1 last hour info, 2 is 12 hours info,
-// 3 is 24 hours(1 day), 4 is 48 hours (2 days).
+// 3 is 24 hours(1 day)
 func loadAvgCore(tmp []model.RecordAboutServerInfo, mode int) *charts.Line {
 	// Create a new line chart object
 	line := charts.NewLine()
@@ -39,16 +39,13 @@ func loadAvgCore(tmp []model.RecordAboutServerInfo, mode int) *charts.Line {
 			timeLabel := currentTime.Add(-time.Duration(i) * time.Hour * 2).Format("15:04")
 			xLabels = append(xLabels, timeLabel)
 		}
-	case 4:
-		currentTime := time.Now()
-		for i := 12; i >= 0; i-- {
-			timeLabel := currentTime.Add(-time.Duration(i) * time.Hour * 4).Format("15:04, 02.01.2006")
-			xLabels = append(xLabels, timeLabel)
-		}
 	}
 	xLabels = reverseSliceString(xLabels)
 
 	// Set the X-axis to represent 24 hours and add the series data for this server
+	if mode == 1 {
+		tmp = reverseRecordAboutServer(tmp)
+	}
 	line.SetXAxis(xLabels).
 		AddSeries("Load avg", GenerateLineItems(tmp)).
 		//See value
@@ -73,7 +70,7 @@ func loadAvgCore(tmp []model.RecordAboutServerInfo, mode int) *charts.Line {
 }
 
 // ramAvg return line for echarts. Create averages of Ram, mode=> 1 is 1 last hour info, 2 is 12 hours info,
-// 3 is 24 hours(1 day), 4 is 48 hours (2 days).
+// 3 is 24 hours(1 day)
 func ramAvg(tmp []model.RecordAboutServerInfo, mode int) *charts.Line {
 	// Create a new line chart object
 	line := charts.NewLine()
@@ -102,16 +99,13 @@ func ramAvg(tmp []model.RecordAboutServerInfo, mode int) *charts.Line {
 			timeLabel := currentTime.Add(-time.Duration(i) * time.Hour * 2).Format("15:04")
 			xLabels = append(xLabels, timeLabel)
 		}
-	case 4:
-		currentTime := time.Now()
-		for i := 12; i >= 0; i-- {
-			timeLabel := currentTime.Add(-time.Duration(i) * time.Hour * 4).Format("15:04, 02.01.2006")
-			xLabels = append(xLabels, timeLabel)
-		}
 	}
 	xLabels = reverseSliceString(xLabels)
 
 	// Set the X-axis to represent 24 hours and add the series data for this server
+	if mode == 1 {
+		tmp = reverseRecordAboutServer(tmp)
+	}
 	line.SetXAxis(xLabels).
 		AddSeries("Ram avg", GenerateLineRam(tmp)).
 		//See value
@@ -137,7 +131,7 @@ func ramAvg(tmp []model.RecordAboutServerInfo, mode int) *charts.Line {
 }
 
 // memoryAvg return line for echarts. Create averages of Core, mode=> 1 is 1 last hour info, 2 is 12 hours info,
-// 3 is 24 hours(1 day), 4 is 48 hours (2 days).
+// 3 is 24 hours(1 day)
 func memoryAvg(tmp []model.RecordAboutServerInfo, mode int) *charts.Line {
 	// Create a new line chart object
 	line := charts.NewLine()
@@ -166,16 +160,13 @@ func memoryAvg(tmp []model.RecordAboutServerInfo, mode int) *charts.Line {
 			timeLabel := currentTime.Add(-time.Duration(i) * time.Hour * 2).Format("15:04")
 			xLabels = append(xLabels, timeLabel)
 		}
-	case 4:
-		currentTime := time.Now()
-		for i := 12; i >= 0; i-- {
-			timeLabel := currentTime.Add(-time.Duration(i) * time.Hour * 4).Format("15:04, 02.01.2006")
-			xLabels = append(xLabels, timeLabel)
-		}
 	}
 	xLabels = reverseSliceString(xLabels)
 
 	// Set the X-axis to represent 24 hours and add the series data for this server
+	if mode == 1 {
+		tmp = reverseRecordAboutServer(tmp)
+	}
 	line.SetXAxis(xLabels).
 		AddSeries("Memory avg", GenerateLineMemory(tmp)).
 		//See value
@@ -202,6 +193,16 @@ func memoryAvg(tmp []model.RecordAboutServerInfo, mode int) *charts.Line {
 
 func reverseSliceString(input []string) []string {
 	output := make([]string, len(input))
+	j := 0
+	for i := len(input) - 1; i >= 0; i-- {
+		output[j] = input[i]
+		j++
+	}
+	return output
+}
+
+func reverseRecordAboutServer(input []model.RecordAboutServerInfo) []model.RecordAboutServerInfo {
+	output := make([]model.RecordAboutServerInfo, len(input))
 	j := 0
 	for i := len(input) - 1; i >= 0; i-- {
 		output[j] = input[i]

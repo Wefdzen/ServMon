@@ -9,6 +9,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 
+	"github.com/Wefdzen/ServMon/internal/website/services"
 	"github.com/Wefdzen/ServMon/pkg/db/database"
 	"github.com/Wefdzen/ServMon/pkg/db/model"
 	inituser "github.com/Wefdzen/ServMon/pkg/initUser"
@@ -62,6 +63,24 @@ func LaunchApp() {
 		case "6":
 			fmt.Println("here will be on/off of smtp NOW NOT WORK")
 			case6()
+		}
+	}
+}
+func init() {
+	//clear lastRecord.json file
+	file, err := os.Create("./internal/launcApp/lastRecord.json")
+	var clear []int
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		defer file.Close()
+		dataJson, err := json.MarshalIndent(clear, "", "  ") // Записываем массив, а не map
+		if err != nil {
+			fmt.Println(err)
+		}
+		_, err = file.Write(dataJson)
+		if err != nil {
+			fmt.Println(err)
 		}
 	}
 }
@@ -147,17 +166,21 @@ func case5() {
 }
 
 func calculateAverage(records []model.RecordAboutServerInfo) *model.RecordAboutServerInfo {
-	var sumLoadAvg, sumRam float64
+	var sumLoadAvg float64
+	var sumRam int
 	for _, rec := range records {
 		loadAvg, _ := strconv.ParseFloat(rec.LoadAvg5Min, 64)
-		ram, _ := strconv.ParseFloat(rec.Ram, 64)
+		ram, _, _ := services.ParseRam(rec.Ram)
+		tmp, _ := strconv.Atoi(ram)
 		sumLoadAvg += loadAvg
-		sumRam += ram
+		sumRam += tmp
 	}
 
 	avgRecord := records[0]
-	avgRecord.LoadAvg5Min = fmt.Sprintf("%v", sumLoadAvg/float64(len(records)))
-	avgRecord.Ram = fmt.Sprintf("%v", sumRam/float64(len(records)))
+	avgRecord.LoadAvg5Min = fmt.Sprintf("%.2f", sumLoadAvg/float64(len(records)))
+
+	_, max, _ := services.ParseRam(avgRecord.Ram)
+	avgRecord.Ram = fmt.Sprintf("%v/%v MB", sumRam/len(records), max)
 	avgRecord.Memory = records[len(records)-1].Memory // use last 'cause last record is True
 
 	return &avgRecord

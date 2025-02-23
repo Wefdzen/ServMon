@@ -6,7 +6,12 @@ import (
 )
 
 func SetupRouter() *gin.Engine {
-	r := gin.Default()
+	//clear log req
+	ginMode := "release"
+	gin.SetMode(ginMode)
+	r := gin.New() //if you want gin http log in console set gin.Default and delete what 1 row below and 2 above
+	r.Use(gin.Recovery())
+
 	r.Static("/static", "./internal/website/static/html")
 	r.LoadHTMLGlob("./internal/website/static/html/*")
 
